@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGE ESPORTS HUB | MLBB & STANDOFF 2</title>
+    <!-- Google Fonts for Retro Pixel Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'cursive'],
+                        silk: ['"Silkscreen"', 'sans-serif']
+                    },
+                    colors: {
+                        pixelBg: '#0b0c10',
+                        pixelCard: '#1f2833',
+                        pixelBorder: '#45a29e',
+                        pixelNeonGreen: '#66fcf1',
+                        pixelYellow: '#f3ca20',
+                        pixelPink: '#ff007f',
+                        pixelPurple: '#8a2be2',
+                        pixelBlue: '#1e90ff'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom 8-bit CSS Styles & Pixel Borders -->
+    <style>
+        body {
+            background-color: #05050a;
+            color: #ffffff;
+            font-family: 'Silkscreen', sans-serif;
+            image-rendering: pixelated;
+        }
+
+        .nes-border {
+            border-style: solid;
+            border-width: 4px;
+            border-color: #ffffff;
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                -4px -4px 0 0 #000,
+                4px -4px 0 0 #000,
+                -4px 4px 0 0 #000,
+                4px 4px 0 0 #000;
+        }
+
+        .pixel-btn {
+            position: relative;
+            display: inline-block;
+            padding: 10px 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #000;
+            background-color: #66fcf1;
+            box-shadow: inset -4px -4px 0px 0px #1f7a8c, 4px 4px 0px 0px #000;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .pixel-btn:hover {
+            background-color: #f3ca20;
+            box-shadow: inset -4px -4px 0px 0px #997a00, 4px 4px 0px 0px #000;
+        }
+
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset -2px -2px 0px 0px #997a00, 2px 2px 0px 0px #000;
+        }
+
+        .pixel-btn-pink {
+            background-color: #ff007f;
+            color: #fff;
+            box-shadow: inset -4px -4px 0px 0px #99004d, 4px 4px 0px 0px #000;
+        }
+        .pixel-btn-pink:hover {
+            background-color: #ff4da6;
+            box-shadow: inset -4px -4px 0px 0px #cc0066, 4px 4px 0px 0px #000;
+        }
+
+        .pixel-card {
+            background-color: #111425;
+            border: 4px solid #66fcf1;
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+
+        .scanline {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .ribbon-stage { position: relative; width: 100%; height: min(78vh, 640px); min-height: 380px; overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; }
+        .ribbon-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .ribbon-stage.vert { touch-action: none; }
+        .ribbon-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; gap: 6px; transition: opacity .4s; }
+        .ribbon-load i { height: 4px; background: #66fcf1; animation: rbd 1s ease-in-out infinite; }
+        .ribbon-load i:nth-child(1), .ribbon-load i:nth-child(2) { width: 44px; } .ribbon-load i:nth-child(3) { width: 38px; }
+        .ribbon-load i:nth-child(2) { animation-delay: .12s; } .ribbon-load i:nth-child(3) { animation-delay: .24s; }
+        @keyframes rbd { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+        .ribbon-stage.ready .ribbon-load { opacity: 0; pointer-events: none; }
+        
+        .bg-vid {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; pointer-events: none;
+            image-rendering: pixelated;
+        }
+        .hero-glow { text-shadow: 0 0 8px rgba(102,252,241,.8), 3px 3px 0 #ff007f; }
+        .hero-blink { animation: heroBlink 1s steps(2, end) infinite; }
+        @keyframes heroBlink { 50% { opacity: .35; } }
+        @media (prefers-reduced-motion: reduce) { .hero-blink { animation: none; } }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0c10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #66fcf1;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-pixelNeonGreen selection:text-black">
+    <div id="bg-video" aria-hidden="true" class="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-pixelBg">
+        <video class="bg-vid" autoplay muted loop playsinline preload="auto" poster="bg-poster.jpg" disablepictureinpicture tabindex="-1">
+            <source src="bg.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/65"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
+    </div>
+
+    <div class="fixed inset-0 scanline z-50 pointer-events-none opacity-40"></div>
+
+    <header class="border-b-4 border-pixelNeonGreen bg-black p-4 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-pixelPink flex items-center justify-center font-pixel text-xl text-black border-2 border-white shadow-[2px_2px_0_0_#fff]">
+                    🎮
+                </div>
+                <div>
+                    <h1 class="font-pixel text-lg md:text-xl text-pixelNeonGreen tracking-wider">RAGE ESPORTS</h1>
+                    <p class="text-xs text-pixelYellow">MLBB & STANDOFF 2 ESPORTS HUB</p>
+                </div>
+            </div>
+
+            <nav class="flex flex-wrap gap-2 text-xs md:text-sm font-pixel">
+                <button onclick="switchTab('tournaments')" id="nav-tournaments" class="pixel-btn">
+                    🏆 ТЭМЦЭЭН
+                </button>
+                <button onclick="switchTab('shop')" id="nav-shop" class="pixel-btn">
+                    🛒 SHOP
+                </button>
+                <button onclick="switchTab('rules')" id="nav-rules" class="pixel-btn">
+                    📜 ДҮРЭМ
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 flex-grow w-full">
+        <section id="hero-anim" class="pixel-card relative overflow-hidden mb-8 h-[420px] md:h-[380px] border-pixelPink" style="background:rgba(5,5,10,.35)">
+            <span class="absolute top-2 left-2 w-3 h-3 bg-pixelNeonGreen"></span>
+            <span class="absolute top-2 right-2 w-3 h-3 bg-pixelPink"></span>
+            <span class="absolute bottom-2 left-2 w-3 h-3 bg-pixelPink"></span>
+            <span class="absolute bottom-2 right-2 w-3 h-3 bg-pixelNeonGreen"></span>
+
+            <div class="relative z-10 h-full flex flex-col justify-center p-5 md:p-10 max-w-xl">
+                <span class="self-start font-pixel text-[10px] md:text-xs text-black bg-pixelYellow px-2 py-1 border-2 border-black shadow-[3px_3px_0_0_#000] hero-blink">▶ PRESS START</span>
+                <h2 class="font-pixel text-pixelNeonGreen text-lg md:text-3xl leading-relaxed mt-4 hero-glow">ХОЖ,<br>ШАГНАЛАА АВ</h2>
+                <p class="font-silk text-xs md:text-base text-gray-200 mt-3">MLBB, Standoff PUBG тэмцээнд багаараа бүртгүүл.</p>
+                <div class="flex flex-wrap gap-3 mt-6">
+                    <button onclick="document.getElementById('tournaments-grid').scrollIntoView({behavior:'smooth'})" class="pixel-btn pixel-btn-pink">ТЭМЦЭЭН ҮЗЭХ</button>
+                    <button onclick="switchTab('shop')" class="pixel-btn">🛒 SHOP</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="pixel-card p-4 mb-8 bg-gradient-to-r from-purple-900 to-indigo-900 border-pixelYellow flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <span class="text-4xl animate-bounce">👾</span>
+                <div>
+                    <h2 class="font-pixel text-pixelYellow text-sm md:text-base">ШИНЭ ТЭМЦЭЭНҮҮД ЭХЭЛЛЭЭ!</h2>
+                    <p class="text-xs md:text-sm text-gray-200 mt-1">
+                        Mobile Legends болон Standoff 2 тэмцээнд багаа бүртгүүлж, шагналын сангийн эзэн болоорой!
+                    </p>
+                </div>
+            </div>
+            <div class="text-xs font-pixel text-pixelNeonGreen border-2 border-pixelNeonGreen p-2 bg-black">
+                STATUS: LIVE 🟢
+            </div>
+        </div>
+
+        <section id="sec-tournaments" class="space-y-6">
+            <div class="flex flex-wrap justify-between items-center bg-black p-3 border-2 border-gray-700 gap-2">
+                <span class="font-pixel text-xs text-pixelYellow">ТООНООС СОНГОХ:</span>
+                <div class="flex gap-2">
+                    <button onclick="filterGame('ALL')" class="px-3 py-1 bg-gray-800 text-xs font-pixel hover:bg-pixelNeonGreen hover:text-black border border-white">БҮГД</button>
+                    <button onclick="filterGame('MLBB')" class="px-3 py-1 bg-gray-800 text-xs font-pixel hover:bg-pixelPink hover:text-white border border-white">MLBB</button>
+                    <button onclick="filterGame('SO2')" class="px-3 py-1 bg-gray-800 text-xs font-pixel hover:bg-pixelYellow hover:text-black border border-white">STANDOFF 2</button>
+                    <button onclick="filterGame('PUBG')" class="px-3 py-1 bg-gray-800 text-xs font-pixel hover:bg-pixelBlue hover:text-white border border-white">PUBG</button>        
+                </div>
+            </div>
+
+            <div id="tournaments-grid" class="ribbon-stage" role="region" aria-label="Тэмцээнүүд">
+                <div class="ribbon-load" aria-hidden="true"><i></i><i></i><i></i></div>
+            </div>
+            <div class="flex items-center justify-center gap-3">
+                <button type="button" id="rb-prev" class="pixel-btn" aria-label="Өмнөх">◀</button>
+                <span class="font-pixel text-[10px] text-pixelNeonGreen text-center">ГҮЙЛГЭЖ СОНГО · КАРТ ДАРЖ БҮРТГҮҮЛ</span>
+                <button type="button" id="rb-next" class="pixel-btn" aria-label="Дараах">▶</button>
+            </div>
+        </section>
+
+        <section id="sec-shop" class="hidden space-y-6">
+            <div class="pixel-card p-4 border-pixelPink bg-gray-900 flex justify-between items-center">
+                <div>
+                    <h2 class="font-pixel text-pixelPink text-base">🛒 RAGE ACCOUNT SHOP</h2>
+                    <p class="text-xs text-gray-300 mt-1">MLBB & Standoff 2 Баталгаажсан VIP Аккаунтууд</p>
+                </div>
+                <div class="hidden md:block text-2xl">🛍️</div>
+            </div>
+            <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="sec-rules" class="hidden space-y-6">
+            <div class="pixel-card p-6 border-pixelYellow bg-gray-900">
+                <h2 class="font-pixel text-pixelYellow text-lg mb-4 flex items-center gap-2">
+                    📜 ТЭМЦЭЭНИЙ ЕРӨНХИЙ ДҮРЭМ
+                </h2>
+                <ul class="space-y-4 text-xs md:text-sm leading-relaxed text-gray-200">
+                    <li class="p-3 bg-black border-l-4 border-pixelNeonGreen">
+                        <strong class="text-pixelNeonGreen font-pixel block mb-1">1. ШУДАРГА ТОГЛОЛТ (FAIR PLAY)</strong>
+                        Аливаа төрлийн Cheats, Hacks, Mod Menu, Emulator (Standoff 2 дээр зөвхөн утас) ашиглахыг хатуу хориглоно. Зөрчвөл шууд тэмцээнээс хасаж, хураамжийг буцаан олгохгүй.
+                    </li>
+                    <li class="p-3 bg-black border-l-4 border-pixelPink">
+                        <strong class="text-pixelPink font-pixel block mb-1">2. БҮРТГЭЛ БОЛОН ТӨЛБӨР</strong>
+                        Бүртгэлийн хураамжийг заагдсан данс руу шилжүүлж, гүйлгээний утга дээр өөрийн И-Мэйл эсвэл Утасны дугаарыг тодорхой бичнэ. Төлбөр баталгаажсанаар бүртгэл баталгаажна.
+                    </li>
+                    <li class="p-3 bg-black border-l-4 border-pixelYellow">
+                        <strong class="text-pixelYellow font-pixel block mb-1">3. ЦАГ БАРИМТЛАЛ</strong>
+                        Тоглолт эхлэхээс 15 минутын өмнө Discord/Telegram лоббид бэлэн байх шаардлагатай. 10 минутаас дээш хоцорсон тохиолдолд техникийн хожигдол олгоно.
+                    </li>
+                    <li class="p-3 bg-black border-l-4 border-purple-500">
+                        <strong class="text-purple-400 font-pixel block mb-1">4. САКС / СКРИНШОТ (MATCH REPORT)</strong>
+                        Тоглолт дууссаны дараа ялагч баг тоглолтын огноо, дүнг харуулсан Screenshot буюу зургийг зохион байгуулагчийн Telegram/Discord руу илгээнэ.
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Dynamic Registration & Payment (Two-Step Flow) -->
+    <div id="modal-register" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-xl p-7 rounded-3xl bg-gradient-to-b from-[#081215]/95 via-[#081215]/95 to-[#0b3a2c]/40 border border-pixelNeonGreen/40 shadow-[0_0_50px_-10px_rgba(45,255,154,0.4)] max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-5">
+                <h3 id="modal-title" class="font-pixel text-xs md:text-sm text-pixelNeonGreen flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-pixelNeonGreen shadow-[0_0_8px_#2dff9a]"></span> ТЭМЦЭЭНД БҮРТГҮҮЛЭХ
+                </h3>
+                <button onclick="closeModal('modal-register')" class="text-red-400 font-pixel hover:text-white text-lg">✕</button>
+            </div>
+
+            <!-- Form Content -->
+            <form id="reg-form" onsubmit="handleFormAction(event)" class="space-y-4 text-xs font-sans">
+                <!-- STEP 1: INFO -->
+                <div id="step-info" class="space-y-4">
+                    <div id="team-name-box">
+                        <label id="name-label" class="block font-pixel text-pixelYellow mb-1 text-[10px]">БАГИЙН НЭР:</label>
+                        <input type="text" id="reg-teamname" placeholder="Жишээ: CyberDragons" class="w-full p-3 bg-black/60 border border-white/15 rounded-xl text-white focus:border-pixelNeonGreen outline-none">
+                    </div>
+
+                    <div class="border-t border-dashed border-white/10 pt-4">
+                        <label id="members-label" class="block font-pixel text-pixelNeonGreen mb-3 text-[10px]">🎮 ТОГЛОГЧИЙН МЭДЭЭЛЭЛ:</label>
+                        <div class="space-y-3" id="members-container"></div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PAYMENT -->
+                <div id="step-payment" class="hidden p-4 bg-black/60 border border-pixelYellow/40 rounded-2xl space-y-3">
+                    <div class="font-pixel text-pixelYellow text-[10px] flex justify-between items-center">
+                        <span>💳 ТӨЛБӨР ШИЛЖҮҮЛЭХ (QR БУЮУ АПП)</span>
+                        <span class="text-pixelNeonGreen text-[9px]">Алхам 2 / 2</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-2 pt-1">
+                        <button type="button" onclick="selectPayment('qpay')" id="pay-btn-qpay" class="flex flex-col items-center justify-center p-2 bg-black/80 border-2 border-pixelNeonGreen rounded-xl cursor-pointer transition gap-1">
+                            <img src="https://www.qpay.mn/images/logo.png" alt="QPay" class="w-7 h-7 rounded object-contain bg-white p-0.5">
+                            <span class="font-pixel text-[9px] text-pixelNeonGreen font-bold">Q-Pay</span>
+                        </button>
+                        <button type="button" onclick="selectPayment('khanbank')" id="pay-btn-khanbank" class="flex flex-col items-center justify-center p-2 bg-black/40 border border-white/10 rounded-xl cursor-pointer hover:border-pixelNeonGreen transition gap-1">
+                            <img src="https://info.khanbank.com/uploads/images/logo_khan_bank.png" alt="Khan Bank" class="w-7 h-7 rounded object-contain bg-white p-0.5">
+                            <span class="font-pixel text-[9px] text-white">Хаан Банк</span>
+                        </button>
+                        <button type="button" onclick="selectPayment('golomt')" id="pay-btn-golomt" class="flex flex-col items-center justify-center p-2 bg-black/40 border border-white/10 rounded-xl cursor-pointer hover:border-pixelNeonGreen transition gap-1">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" alt="Golomt" class="w-7 h-7 rounded object-contain bg-white p-0.5">
+                            <span class="font-pixel text-[9px] text-white">Голомт</span>
+                        </button>
+                        <button type="button" onclick="selectPayment('mbank')" id="pay-btn-mbank" class="flex flex-col items-center justify-center p-2 bg-black/40 border border-white/10 rounded-xl cursor-pointer hover:border-pixelNeonGreen transition gap-1">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" alt="M-Bank" class="w-7 h-7 rounded object-contain bg-white p-0.5">
+                            <span class="font-pixel text-[9px] text-white">M-Bank</span>
+                        </button>
+                    </div>
+
+                    <div id="payment-content" class="pt-3 text-center">
+                        <div id="qpay-box" class="space-y-2">
+                            <div class="inline-block p-2 bg-white rounded-xl shadow-lg">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=ESPORTS_TOURNAMENT_PAYMENT" alt="QPay QR" class="mx-auto rounded">
+                            </div>
+                            <p class="text-[11px] text-pixelNeonGreen font-pixel">QPay QR код (Бүх банкны аппаар уншуулна уу)</p>
+                        </div>
+                        <div id="bank-box" class="hidden space-y-3 py-3">
+                            <p id="bank-app-name" class="text-xs text-white font-bold">Банкны аппликейшн нээх</p>
+                            <a id="bank-deep-link" href="#" target="_blank" class="inline-block px-5 py-2.5 bg-pixelYellow text-black font-pixel text-[10px] rounded-xl font-bold shadow hover:bg-white transition">
+                                Тухайн апп руу орох ↗
+                            </a>
+                            <p class="text-[10px] text-gray-400 mt-1">Дансаар шилжүүлэх бол: <span class="text-pixelNeonGreen font-mono">5035194964 (Ж.Оюунчимэг)</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-3 flex justify-between items-center">
+                    <button type="button" id="back-btn" onclick="goToStep(1)" class="hidden px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-xs font-semibold">◀ Буцах</button>
+                    <div class="flex gap-3 ml-auto">
+                        <button type="button" onclick="closeModal('modal-register')" class="px-5 py-3 rounded-xl border border-white/15 bg-white/5 text-xs font-semibold">ЦУЦЛАХ</button>
+                        <button type="submit" id="submit-btn" class="rounded-xl bg-gradient-to-r from-pixelNeonGreen to-pixelAqua px-6 py-3 text-xs font-bold text-black shadow-[0_0_20px_-2px_rgba(45,255,154,0.7)] transition hover:brightness-110">ҮРГЭЛЖЛҮҮЛЭХ ➔</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Shop -->
+    <div id="modal-shop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="pixel-card w-full max-w-md p-6 bg-gray-900 border-pixelPink">
+            <div class="flex justify-between items-center border-b-2 border-gray-700 pb-3 mb-4">
+                <h3 id="shop-modal-title" class="font-pixel text-xs text-pixelPink">🛍️ АККАУНТ ХУДАЛДАН АВАХ</h3>
+                <button onclick="closeModal('modal-shop')" class="text-red-500 font-pixel hover:text-white text-lg">✕</button>
+            </div>
+            <div id="shop-modal-content" class="space-y-3 text-xs"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden pixel-card p-4 bg-black border-2 border-pixelNeonGreen text-pixelNeonGreen font-pixel text-xs shadow-lg max-w-xs">
+        <span id="toast-msg">Мэдээлэл амжилттай хадгалагдлаа!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t-4 border-pixelNeonGreen bg-black py-6 px-4 mt-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-center md:text-left">
+                <p class="font-pixel text-xs text-pixelNeonGreen">© 2026 RAGE ESPORTS MONGOLIA</p>
+                <p class="text-[10px] text-gray-500 mt-1">Админтай холбогдох сошиал хаягууд</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="https://discord.gg/Gy2XzH5WH" target="_blank" class="pixel-btn bg-[#5865F2] text-white flex items-center gap-2 text-[10px]">
+                    <span>💬</span> Discord
+                </a>
+                <a href="https://www.instagram.com/okamoto_____7/" target="_blank" class="pixel-btn bg-[#E1306C] text-white flex items-center gap-2 text-[10px]">
+                    <span>📸</span> Instagram
+                </a>
+                <a href="https://www.facebook.com/Kyooost" target="_blank" class="pixel-btn bg-[#1877F2] text-white flex items-center gap-2 text-[10px]">
+                    <span>👥</span> Facebook
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const tournaments = [
+            { id: 1, title: "MLBB 5v5 CHAMPIONSHIP S1", game: "MLBB", gameTag: "Mobile Legends", type: "squad", prize: "500,000₮", fee: "Нийт 50,000₮ (Баг)", date: "2026.12.06", slots: "10 / 100 Баг", icon: "⚔️", color: "border-pixelPink" },
+            { id: 2, title: "STANDOFF 2 2v2 DUO CUP", game: "SO2", gameTag: "Standoff 2", type: "duo", prize: "500,000₮", fee: "20,000₮ (Баг)", date: "2026.12.13", slots: "7 / 50 Баг", icon: "🎯", color: "border-pixelYellow" },
+            { id: 3, title: "MLBB 1v1 SOLO MANIA", game: "MLBB", gameTag: "Mobile Legends", type: "solo", prize: "250,000₮", fee: "5,000₮", date: "2026.11.12", slots: "42 / 64 Тоглогч", icon: "👑", color: "border-pixelPink" },
+            { id: 4, title: "STANDOFF 2 5v5 BOMB DEFUSE", game: "SO2", gameTag: "Standoff 2", type: "squad", prize: "1,000,000₮", fee: "50,000₮ (Баг)", date: "2026.12.20", slots: "8 / 50 Баг", icon: "💣", color: "border-pixelYellow" },
+            { id: 5, title: "PUBG 4vs4 CHAMPIONSHIP S1", game: "PUBG", gameTag: "PUBG Mobile", type: "squad", prize: "500,000₮", fee: "40,000₮ (Баг)", date: "2026.11.05", slots: "16 / 30 Баг", icon: "⚔️", color: "border-pixelPink" },
+            { id: 6, title: "PUBG 1vs1 SOLO MANIA", game: "PUBG", gameTag: "PUBG Mobile", type: "solo", prize: "200,000₮", fee: "20,000₮", date: "2026.11.08", slots: "12 / 20 Тоглогч", icon: "👑", color: "border-pixelPink" }
+        ];
+
+        const shopItems = [
+            { id: 101, title: "MLBB VIP ACCOUNT #01", game: "MLBB", rank: "Mythical Glory 1200★", skins: "230+ Skins", price: "250,000₮", image: "🔥" },
+            { id: 102, title: "STANDOFF 2 PRO ACCOUNT", game: "SO2", rank: "The Legend", skins: "Karambit Gold", price: "180,000₮", image: "🔪" },
+            { id: 103, title: "MLBB SMURF ACCOUNT", game: "MLBB", rank: "Epic V", skins: "450+ Skins", price: "60,000₮", image: "⚡" }
+        ];
+
+        function renderTournaments(filter = 'ALL') {
+            const filtered = filter === 'ALL' ? tournaments : tournaments.filter(t => t.game === filter);
+            window.__tFiltered = filtered;
+            if (window.ribbonSet) window.ribbonSet(filtered);
+        }
+
+        function renderShop() {
+            const container = document.getElementById('shop-grid');
+            container.innerHTML = '';
+            shopItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "pixel-card p-4 border-pixelNeonGreen bg-gray-900 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="text-4xl text-center py-4 bg-black border border-gray-800 mb-3">${item.image}</div>
+                        <span class="text-[9px] font-pixel px-2 py-0.5 bg-pixelPurple text-white">${item.game}</span>
+                        <h3 class="font-pixel text-xs text-white my-2">${item.title}</h3>
+                        <div class="text-xs text-gray-300 space-y-1 my-2 bg-black/50 p-2 border border-gray-800">
+                            <p>🏆 Rank: <span class="text-pixelYellow">${item.rank}</span></p>
+                            <p>🎨 Skins: <span class="text-pixelNeonGreen">${item.skins}</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-gray-800 flex items-center justify-between">
+                        <span class="font-pixel text-sm text-pixelYellow">${item.price}</span>
+                        <button onclick="openShopModal(${item.id})" class="pixel-btn pixel-btn-pink text-[10px]">АВАХ</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('sec-tournaments').classList.add('hidden');
+            document.getElementById('sec-shop').classList.add('hidden');
+            document.getElementById('sec-rules').classList.add('hidden');
+
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            document.getElementById('hero-anim').classList.toggle('hidden', tabName !== 'tournaments');
+            showToast(`Хэсэг: ${tabName.toUpperCase()}`);
+        }
+
+        function filterGame(gameType) {
+            renderTournaments(gameType);
+        }
+
+        let currentStep = 1;
+        let activeTournamentType = 'squad';
+
+        function openRegisterModal(title, tournamentId) {
+            currentStep = 1;
+            const tournament = tournaments.find(t => t.title === title || t.id === tournamentId);
+            activeTournamentType = tournament ? tournament.type : 'squad';
+
+            document.getElementById('modal-title').innerText = `📝 ${title} - БҮРТГҮҮЛЭХ`;
+            
+            const teamNameBox = document.getElementById('team-name-box');
+            const membersContainer = document.getElementById('members-container');
+            membersContainer.innerHTML = '';
+
+            if (activeTournamentType === 'solo') {
+                teamNameBox.classList.add('hidden');
+                document.getElementById('members-label').innerText = "🎮 ТОГЛОГЧИЙН МЭДЭЭЛЭЛ:";
+                membersContainer.innerHTML = `
+                    <div class="p-3 bg-black/40 border border-white/10 rounded-xl space-y-2">
+                        <p class="text-pixelYellow font-bold font-pixel text-[10px]">👑 Тоглогч</p>
+                        <input type="text" required placeholder="Тоглогчийн нэр" class="w-full p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" required placeholder="Game ID (Zone ID)" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                            <input type="tel" id="captain-phone" required placeholder="Утасны дугаар" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                        </div>
+                    </div>
+                `;
+            } else if (activeTournamentType === 'duo') {
+                teamNameBox.classList.remove('hidden');
+                document.getElementById('name-label').innerText = "ДУО НЭР (TEAM NAME):";
+                document.getElementById('members-label').innerText = "🎮 2 ГИШҮҮНИЙ МЭДЭЭЛЭЛ:";
+                for(let i=1; i<=2; i++) {
+                    membersContainer.innerHTML += `
+                        <div class="p-3 bg-black/40 border border-white/10 rounded-xl space-y-2">
+                            <p class="${i===1?'text-pixelYellow':'text-gray-300'} font-bold font-pixel text-[10px]">${i===1?'👑 Ахлагч':'⚔️ Гишүүн 2'}</p>
+                            <input type="text" required placeholder="Тоглогчийн нэр" class="w-full p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" required placeholder="Game ID (Zone ID)" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                                <input type="tel" ${i===1?'id="captain-phone"':''} required placeholder="Утасны дугаар" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                teamNameBox.classList.remove('hidden');
+                document.getElementById('name-label').innerText = "БАГИЙН НЭР:";
+                document.getElementById('members-label').innerText = "🎮 5 ГИШҮҮНИЙ МЭДЭЭЛЭЛ (НЭР, ID, УТАС):";
+                for(let i=1; i<=5; i++) {
+                    membersContainer.innerHTML += `
+                        <div class="p-3 bg-black/40 border border-white/10 rounded-xl space-y-2">
+                            <p class="${i===1?'text-pixelYellow':'text-gray-300'} font-bold font-pixel text-[10px]">${i===1?'👑 Гишүүн 1 (Багийн Ахлагч)':'⚔️ Гишүүн '+i}</p>
+                            <input type="text" required placeholder="Тоглогчийн нэр" class="w-full p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" required placeholder="Game ID (Zone ID)" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                                <input type="tel" ${i===1?'id="captain-phone"':''} required placeholder="Утасны дугаар" class="p-2 bg-black/60 border border-white/10 rounded-lg text-white text-xs outline-none">
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            document.getElementById('step-info').classList.remove('hidden');
+            document.getElementById('step-payment').classList.add('hidden');
+            document.getElementById('back-btn').classList.add('hidden');
+            document.getElementById('submit-btn').innerText = "ҮРГЭЛЖЛҮҮЛЭХ ➔";
+            document.getElementById('modal-register').classList.remove('hidden');
+        }
+
+        function handleFormAction(e) {
+            e.preventDefault();
+            if (currentStep === 1) {
+                currentStep = 2;
+                document.getElementById('step-info').classList.add('hidden');
+                document.getElementById('step-payment').classList.remove('hidden');
+                document.getElementById('back-btn').classList.remove('hidden');
+                document.getElementById('submit-btn').innerText = "БҮРТГЭЛИЙГ ДУУСГАХ ✓";
+            } else {
+                handleRegisterSubmitFinal();
+            }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            if(step === 1) {
+                document.getElementById('step-info').classList.remove('hidden');
+                document.getElementById('step-payment').classList.add('hidden');
+                document.getElementById('back-btn').classList.add('hidden');
+                document.getElementById('submit-btn').innerText = "ҮРГЭЛЖЛҮҮЛЭХ ➔";
+            }
+        }
+
+        function selectPayment(method) {
+            ['qpay', 'khanbank', 'golomt', 'mbank'].forEach(m => {
+                const btn = document.getElementById(`pay-btn-${m}`);
+                if(m === method) {
+                    btn.className = "flex flex-col items-center justify-center p-2 bg-black/80 border-2 border-pixelNeonGreen rounded-xl cursor-pointer transition gap-1";
+                } else {
+                    btn.className = "flex flex-col items-center justify-center p-2 bg-black/40 border border-white/10 rounded-xl cursor-pointer hover:border-pixelNeonGreen transition gap-1";
+                }
+            });
+
+            const qpayBox = document.getElementById('qpay-box');
+            const bankBox = document.getElementById('bank-box');
+            const bankName = document.getElementById('bank-app-name');
+            const bankLink = document.getElementById('bank-deep-link');
+
+            if(method === 'qpay') {
+                qpayBox.classList.remove('hidden');
+                bankBox.classList.add('hidden');
+            } else {
+                qpayBox.classList.add('hidden');
+                bankBox.classList.remove('hidden');
+                
+                if(method === 'khanbank') {
+                    bankName.innerText = "Хаан банк аппликейшн нээх";
+                    bankLink.href = "khanbank://";
+                } else if(method === 'golomt') {
+                    bankName.innerText = "SocialPay / Голомт банк нээх";
+                    bankLink.href = "socialpay://";
+                } else if(method === 'mbank') {
+                    bankName.innerText = "M-Bank аппликейшн нээх";
+                    bankLink.href = "mbank://";
+                }
+            }
+        }
+
+        function handleRegisterSubmitFinal() {
+            const captainPhone = document.getElementById('captain-phone') ? document.getElementById('captain-phone').value : '';
+            closeModal('modal-register');
+            showToast('Бүртгэл амжилттай үүслээ! Төлбөрөө шалгана уу.');
+            document.getElementById('reg-form').reset();
+            currentStep = 1;
+        }
+
+        function openShopModal(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            const modalContent = document.getElementById('shop-modal-content');
+            modalContent.innerHTML = `
+                <div class="p-3 bg-black border border-gray-700 space-y-2">
+                    <p class="text-pixelYellow font-pixel">${item.title}</p>
+                    <p>Үнэ: <strong class="text-pixelNeonGreen font-pixel">${item.price}</strong></p>
+                    <p>Рэнк: ${item.rank}</p>
+                    <p>Скинүүд: ${item.skins}</p>
+                </div>
+                <div class="p-3 bg-black border border-pixelPink space-y-1 text-gray-300">
+                    <p class="font-pixel text-pixelPink text-[10px]">💳 ТӨЛБӨР ТӨЛӨХ ДАНС:</p>
+                    <p>Хаан Банк: <strong class="text-pixelNeonGreen font-mono">5009123456</strong></p>
+                    <p>Хүлээн авагч: Б.Тэмүүжин</p>
+                    <p class="text-[10px] text-pixelYellow mt-1">* Төлбөр шилжүүлсний дараа холбогдоно уу.</p>
+                </div>
+                <button onclick="closeModal('modal-shop'); showToast('Захиалга хүлээн авлаа!');" class="pixel-btn w-full text-center">
+                    ХУДАЛДАН АВАЛТЫГ БАТАЛГААЖУУЛАХ
+                </button>
+            `;
+            document.getElementById('modal-shop').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            renderTournaments();
+            renderShop();
+        };
+    </script>
+
+    <!-- TOURNAMENT RIBBON (three.js r160) -->
+    <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+    <script type="module">
+import * as THREE from 'three'
+const host=document.getElementById('tournaments-grid')
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches
+const ASP=1024/600,PI=Math.PI,BANK=-.16,TAIL=1,SHIFT=-.2
+let R;try{R=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){window.ribbonSet=null;host.innerHTML='';window.__fallbackGrid&&0;throw e}
+R.setClearColor(0x000000,0);R.outputColorSpace=THREE.SRGBColorSpace
+host.appendChild(R.domElement)
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(53.4,1,.1,2000);cam.position.set(0,0,41.18)
+const VS=`uniform float uW,uD,uT,uC,uV,uLeanA,uLeanW,uDiag,uAxis;varying vec2 vUv;varying float vDepth;
+const float PI=3.14159265,BANK=-.16,TAIL=1.,SHIFT=-.2;
+float shp(float q){return mix(1.-q*q,sin(PI*q),uC)*exp(-TAIL*q*q);}
+float slp(float q){float b=-2.*q*(1.+TAIL*(1.-q*q));float e=PI*cos(PI*q)-2.*TAIL*q*sin(PI*q);return mix(b,e,uC)*exp(-q*q);}
+float ramp(float s){s=clamp(s,-1.,1.);return s*(1.5-.5*s*s);}
+void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);
+ if(uAxis>.5)w.xy=w.yx;
+ float q=w.x/uW*uT+SHIFT;float a=BANK*slp(q)/PI*uC;
+ if(uV>0.)a+=1.0*uV*smoothstep(.3,.9,abs(w.x/uW))*sign(w.x);
+ float c=cos(a),s=sin(a);float y=w.y*c-w.z*s,z=w.y*s+w.z*c;w.y=y;w.z=z;
+ w.z+=-uD*shp(q);w.y+=uDiag*w.x;
+ if(uV>0.){float m=1.-smoothstep(-1.,.3,w.x/uW);w.y+=.1*uW*uV*m;w.z+=.2*uW*uV*m;}
+ w.z+=uLeanA*ramp(w.x/uLeanW);
+ if(uAxis>.5)w.xy=w.yx;
+ vDepth=(1.+shp(q))*.5;gl_Position=projectionMatrix*viewMatrix*w;}`
+const FS=`uniform sampler2D map;uniform float uAsp,uCorner,uAlpha,uShade;varying vec2 vUv;varying float vDepth;
+void main(){vec3 c=texture2D(map,vUv).rgb;c=mix(c,vec3(.02,.02,.04),uShade*.7*clamp(vDepth,0.,1.));
+ vec2 sz=vec2(uAsp,1.);vec2 p=(vUv-.5)*sz;vec2 d=abs(p)-(sz*.5-uCorner);
+ float sdf=length(max(d,0.))+min(max(d.x,d.y),0.)-uCorner;float fw=fwidth(sdf)+1e-5;
+ gl_FragColor=vec4(c,(1.-smoothstep(-fw,fw,sdf))*uAlpha);gl_FragColor=linearToOutputTexel(gl_FragColor);}`
+const geo=new THREE.PlaneGeometry(1,1,96,24)
+const COL={'border-pixelPink':'#ff007f','border-pixelYellow':'#f3ca20','border-pixelBlue':'#1e90ff','border-pixelPurple':'#8a2be2'}
+function wrap(g,t,x,y,w,lh){let l='',yy=y;for(const wd of t.split(' ')){const n=l?l+' '+wd:wd;if(g.measureText(n).width>w&&l){g.fillText(l,x,yy);yy+=lh;l=wd}else l=n}g.fillText(l,x,yy);return yy}
+function draw(it,phoneMode){const s=document.createElement('canvas');s.width=1024;s.height=600;const g=s.getContext('2d'),col=COL[it.color]||'#66fcf1'
+ g.fillStyle='#111425';g.fillRect(0,0,1024,600);g.fillStyle='rgba(255,255,255,.04)';for(let y=0;y<600;y+=4)g.fillRect(0,y,1024,2)
+ g.strokeStyle=col;g.lineWidth=16;g.strokeRect(8,8,1008,584)
+ g.font='84px serif';g.textBaseline='alphabetic';g.fillStyle='#fff';g.fillText(it.icon,44,112)
+ g.font='22px "Press Start 2P"';const tw=g.measureText(it.gameTag).width;g.fillStyle='#000';g.fillRect(976-tw-24,48,tw+24,44);g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(976-tw-24,48,tw+24,44);g.fillStyle='#66fcf1';g.fillText(it.gameTag,976-tw-12,80)
+ g.font='34px "Press Start 2P"';g.fillStyle='#fff';const ly=wrap(g,it.title,44,178,936,46)
+ const top=ly+26;g.fillStyle='#2a2f45';g.fillRect(44,top,936,3)
+ const rows=[['💰 Шагналын сан:',it.prize,'#f3ca20',1],['🎟️ Хураамж:',it.fee,'#fff',0],['📅 Огноо:',it.date,'#66fcf1',1],['👥 Оролцогчид:',it.slots,'#9ca3af',0]]
+ rows.forEach((r,i)=>{const y=top+46+i*44;g.font='26px Silkscreen';g.textAlign='left';g.fillStyle='#d1d5db';g.fillText(r[0],44,y);g.font=r[3]?'26px "Press Start 2P"':'26px Silkscreen';g.fillStyle=r[2];g.textAlign='right';g.fillText(r[1],980,y)})
+ g.textAlign='left';g.fillStyle='#000';g.fillRect(50,502,936,66);g.fillStyle='#66fcf1';g.fillRect(44,496,936,66)
+ g.fillStyle='rgba(255,255,255,.35)';g.fillRect(44,496,936,6);g.fillStyle='#000';g.font='32px "Press Start 2P"';g.textAlign='center';g.fillText('БҮРТГҮҮЛЭХ',512,545);g.textAlign='left'
+ const t=new THREE.CanvasTexture(s);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
+let meshes=[],items=[],vw=0,vh=0,H,W,k,phone,U,ch,cw,gap,L,cur=0,tar=0,visible=true,fontsOk=false,born=0
+const S={W:1,T:1.15,C:1,leanA:0,leanW:1,diag:.03,axis:0,D:0,V:0}
+function shp(q){return(S.C?Math.sin(PI*q):1-q*q)*Math.exp(-TAIL*q*q)}
+function slp(q){const b=-2*q*(1+TAIL*(1-q*q)),e=PI*Math.cos(PI*q)-2*TAIL*q*Math.sin(PI*q);return(S.C?e:b)*Math.exp(-q*q)}
+const sst=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)},ramp=s=>{s=Math.max(-1,Math.min(1,s));return s*(1.5-.5*s*s)}
+function warp(wx,wy){let x=wx,y=wy,z=0;if(S.axis)[x,y]=[y,x]
+ const q=x/S.W*S.T+SHIFT;let a=BANK*slp(q)/PI*S.C;if(S.V>0)a+=S.V*sst(.3,.9,Math.abs(x/S.W))*Math.sign(x)
+ const c=Math.cos(a),sn=Math.sin(a),ny=y*c-z*sn,nz=y*sn+z*c;y=ny;z=nz;z+=-S.D*shp(q);y+=S.diag*x
+ if(S.V>0){const m=1-sst(-1,.3,x/S.W);y+=.1*S.W*S.V*m;z+=.2*S.W*S.V*m}
+ z+=S.leanA*ramp(x/S.leanW);if(S.axis)[x,y]=[y,x];return new THREE.Vector3(x,y,z).project(cam)}
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(1,1,48,24),new THREE.ShaderMaterial({transparent:true,depthTest:false,depthWrite:false,side:THREE.DoubleSide,
+ uniforms:{uA:{value:0},uCells:{value:new THREE.Vector2(10,10)}},
+ vertexShader:`varying vec2 vUv;varying float vFar;void main(){vUv=uv;vec4 w=modelMatrix*vec4(position,1.);vFar=clamp(-w.z/120.,-1.,1.);gl_Position=projectionMatrix*viewMatrix*w;}`,
+ fragmentShader:`uniform float uA;uniform vec2 uCells;varying vec2 vUv;varying float vFar;
+ void main(){float fade=1.-smoothstep(.2,.95,vFar);vec2 g=vec2(vUv.x*uCells.x,vFar*uCells.y);vec2 f=abs(fract(g)-.5);vec2 fw=fwidth(g)*1.5;
+ float l=max(1.-smoothstep(0.,fw.x,f.x),1.-smoothstep(0.,fw.y,f.y));
+ vec3 col=mix(vec3(.4,.99,.95),vec3(1.,0.,.5),smoothstep(0.,.8,vFar))*l*.28;gl_FragColor=vec4(col,l*.55*fade*uA);}`}))
+floor.rotation.x=-PI/2;floor.renderOrder=-1;floor.frustumCulled=false;scene.add(floor)
+function modeReset(){cur=tar=phone?-.177*vh:100}
+let lastPhone=null
+function layout(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;vw=w;vh=h;phone=innerWidth<650;U=vw/(phone?390:1500)
+ R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(vw,vh,false);cam.aspect=vw/vh;cam.updateProjectionMatrix()
+ H=Math.tan(cam.fov*PI/360)*41.18;W=H*vw/vh;k=2*H/vh;host.classList.toggle('vert',phone)
+ if(phone){ch=Math.min(.58*vh,550*U*1.2);cw=ch*ASP;gap=20*U;L=meshes.length*(ch+gap)}else{ch=Math.min(.58*vh,550*U*1.2);cw=ch*ASP;gap=10*U;L=meshes.length*(cw+gap)}
+ Object.assign(S,{W:phone?H:W,T:phone?1:1.15,C:phone?0:1,leanA:phone?0:-.12*W,leanW:phone?1:W,diag:phone?0:.03,axis:phone?1:0})
+ meshes.forEach(m=>{const u=m.material.uniforms;u.uCorner.value=(phone?15:20)*U/ch;u.uW.value=S.W;u.uT.value=S.T;u.uC.value=S.C;u.uLeanA.value=S.leanA;u.uLeanW.value=S.leanW;u.uDiag.value=S.diag;u.uAxis.value=S.axis;u.uShade.value=phone?0:1})
+ const a=-ch*k/2-.06*H,o=6*H,near=Math.min(41.18*(1-Math.abs(a)/H)+.2*H,41.18*.8)
+ floor.visible=!phone;floor.scale.set(W*8,near+o,1);floor.position.set(0,a,(near-o)/2);floor.material.uniforms.uCells.value.set(W*8/(.22*H),o/(.22*H))
+ if(lastPhone!==phone){lastPhone=phone;modeReset()};return true}
+function clear(){meshes.forEach(m=>{m.material.uniforms.map.value.dispose();m.material.dispose();scene.remove(m)});meshes=[]}
+function set(list){items=list;if(!fontsOk)return;clear();if(!list.length)return
+ let seq=[];while(seq.length<6)seq=seq.concat(list)
+ seq.forEach(it=>{const m=new THREE.Mesh(geo,new THREE.ShaderMaterial({vertexShader:VS,fragmentShader:FS,transparent:true,depthTest:false,depthWrite:false,
+  uniforms:{map:{value:draw(it)},uW:{value:1},uD:{value:0},uT:{value:1.15},uC:{value:1},uV:{value:0},uLeanA:{value:0},uLeanW:{value:1},uDiag:{value:.03},uAxis:{value:0},uAsp:{value:ASP},uCorner:{value:.05},uAlpha:{value:0},uShade:{value:1}}}))
+  m.frustumCulled=false;m.userData.item=it;m.userData.a=0;scene.add(m);meshes.push(m)})
+ lastPhone=null;layout();born=performance.now();host.classList.add('ready')}
+window.ribbonSet=set
+document.fonts.ready.then(()=>Promise.all([document.fonts.load('26px "Press Start 2P"'),document.fonts.load('26px Silkscreen')])).catch(()=>{}).then(()=>{fontsOk=true;set(window.__tFiltered||items)})
+const push=d=>{tar+=d;if(!phone)tar=cur+Math.tanh((tar-cur)/vw)*vw}
+host.addEventListener('wheel',e=>{if(e.ctrlKey)return;const h=Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.shiftKey;if(!h)return;e.preventDefault();push((e.shiftKey&&!e.deltaX?e.deltaY:e.deltaX)*1.25)},{passive:false})
+let down=null,mv=0,last=0
+host.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};mv=0;last=0;host.setPointerCapture(e.pointerId);host.style.cursor='grabbing'})
+host.addEventListener('pointermove',e=>{if(down){const d=phone?e.clientY-down.y:e.clientX-down.x;const dx=Math.abs(e.clientX-down.x)+Math.abs(e.clientY-down.y);mv=Math.max(mv,dx);last=phone?e.clientY-down.y:e.clientX-down.x;push(-(phone?e.movementY:e.movementX)*1.6)}
+ else if(!phone){host.style.cursor=hit(e)?'pointer':'grab'}})
+host.addEventListener('pointerup',e=>{host.style.cursor='grab';if(down&&mv<6){const m=hit(e);if(m&&window.openRegisterModal)window.openRegisterModal(m.userData.item.title)}else if(down)push(-(phone?e.movementY:e.movementX)*14);down=null})
+host.addEventListener('pointercancel',()=>{down=null})
+document.getElementById('rb-prev').onclick=()=>push(-(phone?vh:vw)*.35)
+document.getElementById('rb-next').onclick=()=>push((phone?vh:vw)*.35)
+function hit(e){const r=host.getBoundingClientRect(),nx=(e.clientX-r.left)/r.width*2-1,ny=-((e.clientY-r.top)/r.height*2-1);let best=null,bd=1e9
+ for(const m of meshes){let x0=9,x1=-9,y0=9,y1=-9;for(const u of[-.5,-.25,0,.25,.5])for(const v of[-.5,.5]){const p=warp(m.position.x+u*m.scale.x,m.position.y+v*m.scale.y);x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}
+  if(nx>=x0&&nx<=x1&&ny>=y0&&ny<=y1){const d=Math.abs(nx-(x0+x1)/2);if(d<bd){bd=d;best=m}}}return best}
+new ResizeObserver(()=>{layout()}).observe(host)
+new IntersectionObserver(es=>visible=es[0].isIntersecting).observe(host)
+let prev=performance.now()
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-prev)/1e3);prev=now
+ if(!visible||!meshes.length||!host.clientWidth||document.hidden)return
+ const ratio=Math.min(dt*60,2);cur+=(tar-cur)*.1*ratio;cur=reduce?tar:Math.round(cur*100)/100
+ const N=phone?245:550,t=Math.tanh((tar-cur)/N),r=reduce?0:Math.min(1,Math.abs(t*Math.abs(t)))
+ S.D=phone?H*.18*1.1*r:W*.2*(1+1.1*r);S.V=phone?0:r
+ const sz=(phone?ch:cw)+gap,left=-(L-(phone?vh:vw))/2
+ meshes.forEach((m,i)=>{const u=m.material.uniforms;u.uD.value=S.D;u.uV.value=S.V
+  const p=((i*sz-cur-left)%L+L)%L+left;m.scale.set(cw*k,ch*k,1)
+  if(phone)m.position.set(0,-(p+ch/2-vh/2)*k,0);else m.position.set((p+cw/2-vw/2)*k,0,0)
+  m.userData.a=Math.min(1,m.userData.a+dt/.6);u.uAlpha.value=m.userData.a})
+ const fu=floor.material.uniforms.uA;fu.value=Math.min(.9,fu.value+dt/.8*.9)
+ R.render(scene,cam)}
+requestAnimationFrame(frame)
+    </script>
+</body>
+</html>
